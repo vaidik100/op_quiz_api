@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Activity9</title>
+    <style>
+        
+    </style>
+</head>
+<body style="background-color:rgb(4, 4, 57); text-align: center;">
+
+    <h1 style="color:white;">API Helper</h1>
+
+    <label for="number" style="color:white; font-size: x-large;">Select a number:</label></br>
+    <select id="numberSelect" style="font-size: 16px; height: 40px; width: 600px;">
+        <option value="">Select a number</option>
+    
+        <option value="1">1</option>         
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+    </select></br></br>
+
+    <label for="category" style="color:white; font-size: x-large;">Select category:</label></br>
+    <select id="categorySelect" style="font-size: 16px; height: 40px; width: 600px;">
+        <option value="">Any Category</option>
+    
+        <option value="1">General Knowledge</option>         
+        <option value="2">Entertainment: Books</option>
+        <option value="3">Entertainment:Film</option>
+        <option value="4">Entertainment: Music</option>
+        <option value="5">Entertainment: Musicals & Theatres</option>
+        <option value="6">Entertainment: Televison </option>
+        <option value="7">Entertainment: Video Games</option>
+        <option value="8">Entertainment: Board games</option>
+        <option value="9">Science & Nature</option>
+        <option value="10">Science: Computers</option>
+        <option value="11">Science: Mathematics</option>
+        <option value="12">Mythology</option>
+        <option value="13">Sports</option>
+        <option value="10">Geography</option>
+        <option value="10">History</option>
+        <option value="10">Politics</option>
+        <option value="10">Science: Computers</option>
+        <option value="10">Art</option>
+        <option value="10">celebrities</option>
+        <option value="10">Animals</option>
+        <option value="10">Vehicles</option>
+        <option value="10">Entertainment: Comics</option>
+        <option value="10">Science: Gadgets</option>
+        <option value="10">Entertainment: Japanese Anime & Manga</option>
+        <option value="10">Entertainment: Cartoons & Animations</option>
+        
+    </select></br></br>
+
+    <label for="difficulty" style="color:white; font-size: x-large;">Select Difficulty:</label></br>
+    <select id="difficultySelect" style="font-size: 16px; height: 40px; width: 600px;">
+        <option value="">Any Difficulty</option>
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+    </select></br></br>
+
+    <label for="type" style="color:white; font-size: x-large;">Select Type:</label></br>
+    <select id="typeSelect" style="font-size: 16px; height: 40px; width: 600px;">
+        <option value="">Any Type</option>
+        <option value="multiple">Multiple Choice</option>
+        <option value="boolean">True/False</option>
+    </select></br></br>
+
+    <label for="encoding" style="color:white; font-size: x-large;">Select Encoding:</label></br>
+    <select id="encodingSelect" style="font-size: 16px; height: 40px; width: 600px;">
+        <option value="">Default Encoding</option>
+        <option value="urlLegacy">Legacy URL Encoding</option>
+        <option value="url3986">URL Encoding(3986)</option>
+        <option value="base64">Base64 Encoding</option>
+    </select></br></br>
+
+    <button type="button" id="generateButton" onclick="generate()" style="font-size: 22px; width: 600px; height: 40px;">GENERATE</button>
+
+    <div id="quizQuestions" style="color: white;"></div>
+
+    <script>
+        function generate() {
+            var number = document.getElementById('numberSelect').value;
+            var category = document.getElementById('categorySelect').value;
+            var difficulty = document.getElementById('difficultySelect').value;
+            var type = document.getElementById('typeSelect').value;
+            var encoding = document.getElementById('encodingSelect').value;
+    
+            var apiUrl = 'https://opentdb.com/api.php?amount=' + number + '&category=' + category + '&difficulty=' + difficulty + '&type=' + type + '&encode=' + encoding;
+    
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    var quizQuestions = document.getElementById('quizQuestions');
+                    quizQuestions.innerHTML = '<h2>Quiz Questions</h2>';
+                    var score = 0;
+    
+                    data.results.forEach(function (question, index) {
+                        quizQuestions.innerHTML += '<p>Q' + (index + 1) + ': ' + question.question + '</p>';
+    
+                        // Display multiple-choice options
+                        question.incorrect_answers.forEach(function (option, optionIndex) {
+                            quizQuestions.innerHTML += '<input type="radio" name="q' + (index + 1) + '" value="' + option + '"> ' + option + '<br>';
+                        });
+                        quizQuestions.innerHTML += '<input type="radio" name="q' + (index + 1) + '" value="' + question.correct_answer + '"> ' + question.correct_answer + '<br>';
+                    });
+    
+                    // Add a button for submitting answers
+                    var submitButton = document.createElement('button');
+                    submitButton.innerHTML = 'Submit';
+                    submitButton.onclick = function () {
+                        checkAnswers(data.results);
+                    };
+    
+                    quizQuestions.appendChild(submitButton);
+                })
+                .catch(error => {
+                    console.error('Error fetching quiz questions: ', error);
+                });
+        }
+    
+        function checkAnswers(questions) {
+            var score = 0;
+    
+            questions.forEach(function (question, index) {
+                var selectedAnswer = document.querySelector('input[name="q' + (index + 1) + '"]:checked');
+    
+                if (selectedAnswer && selectedAnswer.value.toLowerCase() === question.correct_answer.toLowerCase()) {
+                    document.getElementById('quizQuestions').innerHTML += '<p style="color: green;">Q' + (index + 1) + ': Correct!</p>';
+                    score++;
+                } else {
+                    document.getElementById('quizQuestions').innerHTML += '<p style="color: red;">Q' + (index + 1) + ': Wrong! Correct answer: ' + question.correct_answer + '</p>';
+                }
+            });
+    
+            // Display final score
+            var scoreDisplay = document.createElement('h2');
+            scoreDisplay.innerHTML = 'Score: ' + score + '/' + questions.length;
+            document.getElementById('quizQuestions').appendChild(scoreDisplay);
+        }
+    </script>
+    
+    
+    
+
+</body>
+</html>
